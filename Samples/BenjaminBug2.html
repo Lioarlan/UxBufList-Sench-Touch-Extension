@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" href="../sencha_touch/resources/css/sencha-touch.css" type="text/css">
+
+    <script type="text/javascript" src="../sencha_touch/sencha-touch.js"></script>
+    <script type="text/javascript" src="albumdata.js"></script>
+    <script type="text/javascript" src="UxBufList.js"></script>
+<style type="text/css">
+	.x-list .x-list-item {
+		font-weight: bold;
+		font-size: 100%;
+		font-family:helvetica;
+	}
+</style>  
+    <script type="text/javascript">
+Ext.reg('mylist', Ext.ux.BufferedList);
+
+Ext.setup({
+    onReady: function(){
+        Ext.regModel('Contact', {
+            fields: ['firstName', 'lastName']
+        });
+        
+        var store = new Ext.data.Store({
+            model: 'Contact',
+            proxy: {
+                type: 'ajax',
+                url : './bendata.js',
+				noCache: false,
+				limitParam: undefined,
+                reader: {
+                    type: 'json'
+                }
+            },
+            data : [
+                {firstName:'John', lastName:'Lenon'},
+                {firstName:'Frank', lastName:'Zappa'},
+                {firstName:'Led', lastName:'Zeppelin'}
+            ]
+        });
+        
+        new Ext.TabPanel({
+            fullscreen: true,
+            items: [{
+                xtype: 'panel',
+                title: 'MyPanel',
+                dockedItems: [{
+                    xtype: 'button',
+                    text: 'read new data',
+                    handler: function(){
+                        Ext.getCmp('mylist').store.read();
+                    }
+                }]
+            }, {
+                id: 'mylist',
+                title: 'MyList',
+                xtype: 'mylist',
+                itemTpl: '{firstName} {lastName}',
+                store: store
+            }]
+        });
+    }
+});    </script>
+</head>
+<body></body>
+</html>
