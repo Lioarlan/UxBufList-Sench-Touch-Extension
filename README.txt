@@ -16,7 +16,8 @@ parameters, while providing the following enhancements and changes:
   list config parameter "grouped" to true, and the extension config parameter 
   useGroupHeaders to false, you can use an index bar without having group 
   headers, as some native iOS applications do. Obviously, setting 
-  useGroupHeaders to true gives you standard group headers.
+  useGroupHeaders to true gives you standard group headers. As of release
+  0.15, you can also use group headers without an index bar.
 - The configuration parameter "blockScrollSelect" is provided. If set to 
   true, this prevents item selection while the list is still scrolling, 
   so you can tap the list to stop scroll without invoking a selection - 

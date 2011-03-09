@@ -3,7 +3,7 @@
  * Author: Scott Borduin, Lioarlan, LLC
  * License: GPL (http://www.gnu.org/licenses/gpl.html) -or- MIT (http://www.opensource.org/licenses/mit-license.php)
  * 
- * Release: 0.1
+ * Release: 0.15
  * 
  * Acknowledgement: Based partly on public contributions from members of the Sencha.com bulletin board.
  * 
@@ -164,7 +164,7 @@ Ext.ux.BufferedList = Ext.extend(Ext.List, {
 	// check if index of store record corresponds to a currently rendered item
 	isItemRendered: function(index) {
 		// Trivial check after first render
-		return this.bottomItemRendered > 0 ?
+		return this.all.elements.length > 0 ?
 			index >= this.topItemRendered && index <= this.bottomItemRendered : false;
 	},
 
@@ -581,7 +581,7 @@ Ext.ux.BufferedList = Ext.extend(Ext.List, {
 
 		// build temporary map of group string to store index from store records
 		for ( i = 0; i < sc; i++ ) {
-			key = store.getGroupString(store.getAt(i)).toLowerCase();
+            key = escape(store.getGroupString(store.getAt(i)).toLowerCase());
 			if ( recmap[key] === undefined ) {
 				recmap[key] = { index: i, closest: key, prev: prevGroup } ;
 				prevGroup = key;
@@ -592,46 +592,61 @@ Ext.ux.BufferedList = Ext.extend(Ext.List, {
 		}
 
 		// now make sure our saved map has entries for every index string
-		// in our index bar.
-		var barStore = this.indexBar.store, 
-			bc = barStore.getCount(), 
-			grpid, 
-			idx = 0,
-			recobj;
-			prevGroup = '',
-			key = '';
-		for ( i = 0; i < bc; i++ ) {
-			grpid = barStore.getAt(i).get('key').toLowerCase();
-			recobj = recmap[grpid];
-			if ( recobj ) {
-				idx = recobj.index;
-				key = recobj.closest;
-				prevGroup = recobj.prev;
+		// in our index bar, if we have a bar.
+        if (!!this.indexBar) {
+			var barStore = this.indexBar.store, 
+				bc = barStore.getCount(), 
+				grpid, 
+				idx = 0,
+				recobj;
+				prevGroup = '',
+				key = '';
+        	for ( i = 0; i < bc; i++ ) {
+				grpid = barStore.getAt(i).get('key').toLowerCase();
+				recobj = recmap[grpid];
+				if ( recobj ) {
+					idx = recobj.index;
+					key = recobj.closest;
+					prevGroup = recobj.prev;
+				}
+				else if ( !key ) {
+					key = firstKey;
+				}
+				groupMap[grpid] = { index: idx, closest: key, prev: prevGroup };
 			}
-			else if ( !key ) {
-				key = firstKey;
-			}
-			groupMap[grpid] = { index: idx, closest: key, prev: prevGroup };
-		}
-		
+        }
+        else {
+            this.groupIndexMap = recmap;
+        }		
 	},
 	
-	// @private - get starting index of a group by group string
-	groupStartIndex: function(groupId) {
-		return this.groupIndexMap[groupId.toLowerCase()].index;
-	},
-	
-	// @private - get group preceding the one in groupId
-	getPreviousGroup: function(groupId) {
-		return this.groupIndexMap[groupId.toLowerCase()].prev;
-	},
-	
-	// @private - get closest non-empty group to specified groupId from indexBar
-	getClosestGroupId: function(groupId) {
-		return this.groupIndexMap[groupId.toLowerCase()].closest;
-	},
+    // @private - get an encoded version of the string for use as a key in the hash 
+    getKeyFromId: function (groupId){
+        return escape(groupId.toLowerCase());
+    },
+     // @private - get the group object corresponding to the given id
+    getGroupObj:function (groupId){
+        return this.groupIndexMap[this.getKeyFromId(groupId)];
+    },
+    
+    // @private - get starting index of a group by group string
+    groupStartIndex: function(groupId) {
+        return this.getGroupObj(groupId).index;
+    },
+    
+    
+    // @private - get group preceding the one in groupId
+    getPreviousGroup: function(groupId) {
+        
+        return this.getGroupObj(groupId).prev;
+    },
+    
+    // @private - get closest non-empty group to specified groupId from indexBar
+    getClosestGroupId: function(groupId) {
+        return this.getGroupObj(groupId).closest;
+    },
 
-	// @private
+    // @private
 	indexOfRecord: function(rec) {
 		// take advantage of group map to speed up search for record index. Speeds up
 		// selection slightly.
