@@ -104,28 +104,31 @@ Ext.ux.BufferedList = Ext.extend(Ext.List, {
 		// DataView.refresh renders our proxies and list container
 		Ext.ux.BufferedList.superclass.refresh.apply(this,arguments);
 
-		// locate our proxy and list container nodes
-		this.topProxy = this.getTargetEl().down('.ux-list-top-proxy');
-		
-		this.bottomProxy = this.getTargetEl().down('.ux-list-bottom-proxy');
+		// if the store is unbound then the el appears to be null - once bound this is re-called and the el not null
+		if(this.getTargetEl()) {
+			// locate our proxy and list container nodes
+			this.topProxy = this.getTargetEl().down('.ux-list-top-proxy');
+			
+			this.bottomProxy = this.getTargetEl().down('.ux-list-bottom-proxy');
 
-		this.listContainer = this.getTargetEl().down('.ux-list-container');
+			this.listContainer = this.getTargetEl().down('.ux-list-container');
 
-		// if our store is not yet filled out, do nothing more
-		if ( this.store.getCount() === 0 ) {
-			return;
+			// if our store is not yet filled out, do nothing more
+			if ( this.store.getCount() === 0 ) {
+				return;
+			}
+					
+			// if this is a grouped list, initialize group index map
+			if (this.grouped) {
+				this.initGroupIndexMap();
+				this.groupHeaders = [];
+			}
+
+			// show & buffer first items in the list
+			this.topProxy.setHeight(0);
+			this.bottomProxy.setHeight(this.store.getCount() * this.maxItemHeight);
+			this.renderOnScroll(0); // renders first this.minimumItems nodes in store
 		}
-				
-		// if this is a grouped list, initialize group index map
-		if (this.grouped) {
-			this.initGroupIndexMap();
-			this.groupHeaders = [];
-		}
-
-		// show & buffer first items in the list
-		this.topProxy.setHeight(0);
-		this.bottomProxy.setHeight(this.store.getCount() * this.maxItemHeight);
-		this.renderOnScroll(0); // renders first this.minimumItems nodes in store
 		
 	},
 
@@ -176,7 +179,7 @@ Ext.ux.BufferedList = Ext.extend(Ext.List, {
 		var elems = this.all.elements, 
 			nElems = elems.length,
 			returnArray = [],
-			thisHeight = this.height,
+			thisHeight = this.getHeight(),
 			node,
 			offTop,
 			i;
@@ -230,7 +233,7 @@ Ext.ux.BufferedList = Ext.extend(Ext.List, {
 			incrementalRender = false;
 		}
 		else {
-			var thisHeight = this.height;
+			var thisHeight = this.getHeight();
 			// position of top of list relative to top of visible area (+above, -below)
 			var listTopMargin = scrollPos - this.topProxy.getHeight();
 			// position of bottom of list relative to bottom of visible area (+above, -below)
@@ -301,7 +304,7 @@ Ext.ux.BufferedList = Ext.extend(Ext.List, {
 
 		// zero out bottom proxy if we're at the bottom ...
 		if ( newBottom === maxIndex ) {
-			var bottomPadding = this.height - this.listContainer.getHeight();
+			var bottomPadding = this.getHeight() - this.listContainer.getHeight();
 			this.bottomProxy.setHeight(bottomPadding > 0 ? bottomPadding : 0);
 		}
 
