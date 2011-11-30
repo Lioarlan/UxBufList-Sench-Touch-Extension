@@ -32,8 +32,16 @@ Ext.ux.BufferedList = Ext.extend(Ext.List, {
 	
 	// override
 	initComponent: function() {
-		this.itemTplDelayed = new Ext.XTemplate('<div class="x-list-item"><div class="x-list-item-body">' + this.itemTpl + '</div></div>').compile();
-		
+
+        // Bug fix by benjamin.baton on Sencha forum to handle item disclosure
+        //this.itemTplDelayed = new Ext.XTemplate('<div class="x-list-item"><div class="x-list-item-body">' + this.itemTpl + '</div></div>').compile();
+        this.itemTplDelayed = '<tpl for="."><div class="x-list-item"><div class="x-list-item-body">' + this.itemTpl + '</div>';
+        if (this.onItemDisclosure) {
+            this.itemTplDelayed += '<div class="x-list-disclosure"></div>';
+        }
+        this.itemTplDelayed += '</div></tpl>';
+        this.itemTplDelayed = new Ext.XTemplate(this.itemTplDelayed).compile();
+
 		Ext.ux.BufferedList.superclass.initComponent.call(this);
 
 		// new template which will only be used for our proxies
