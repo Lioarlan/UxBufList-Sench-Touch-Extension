@@ -597,6 +597,7 @@ Ext.ux.BufferedList = Ext.extend(Ext.List, {
 		// now make sure our saved map has entries for every index string
 		// in our index bar, if we have a bar.
         if (!!this.indexBar) {
+            Ext.applyIf(this.groupIndexMap,recmap);
 			var barStore = this.indexBar.store, 
 				bc = barStore.getCount(), 
 				grpid, 
