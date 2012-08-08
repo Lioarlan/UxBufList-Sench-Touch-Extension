@@ -36,12 +36,19 @@ Ext.ux.BufferedList = Ext.extend(Ext.List, {
         // Bug fix by benjamin.baton on Sencha forum to handle item disclosure
         //this.itemTplDelayed = new Ext.XTemplate('<div class="x-list-item"><div class="x-list-item-body">' + this.itemTpl + '</div></div>').compile();
         
-        this.itemTplDelayed = '<tpl for="."><div class="x-list-item"><div class="x-list-item-body">' + this.itemTpl + '</div>';
+        //about to use XTemplate.
+        var tplStr = this.itemTpl;
+        if(this.itemTpl.html !== undefined){
+            tplStr = this.itemTpl.html;
+        }
+        this.itemTplDelayed = '<tpl for="."><div class="x-list-item"><div class="x-list-item-body">' + tplStr + '</div>';
+
         if (this.onItemDisclosure) {
             this.itemTplDelayed += '<div class="x-list-disclosure"></div>';
         }
         this.itemTplDelayed += '</div></tpl>';
         this.itemTplDelayed = new Ext.XTemplate(this.itemTplDelayed).compile();
+        Ext.applyIf(this.itemTplDelayed,this.itemTpl);
 
 		Ext.ux.BufferedList.superclass.initComponent.call(this);
 
