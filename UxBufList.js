@@ -121,7 +121,7 @@ Ext.ux.BufferedList = Ext.extend(Ext.List, {
 
 
 		if(this.numRecords){
-			//storeのdataが変化かつ増加した。
+			//when store data is increased.
 			if(this.store.getCount() > this.numRecords){
 				this.renderOnScroll({isStoreDataIncreased:true});
 				this.numRecords = this.store.getCount();
