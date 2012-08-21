@@ -1,3 +1,4 @@
+
 /*
  * 
  * Author: Scott Borduin, Lioarlan, LLC
@@ -36,12 +37,20 @@ Ext.ux.BufferedList = Ext.extend(Ext.List, {
         // Bug fix by benjamin.baton on Sencha forum to handle item disclosure
         //this.itemTplDelayed = new Ext.XTemplate('<div class="x-list-item"><div class="x-list-item-body">' + this.itemTpl + '</div></div>').compile();
         
-        this.itemTplDelayed = '<tpl for="."><div class="x-list-item"><div class="x-list-item-body">' + this.itemTpl + '</div>';
+
+        //about to use XTemplate.
+        var tplStr = this.itemTpl;
+        if(this.itemTpl.html !== undefined){
+            tplStr = this.itemTpl.html;
+        }
+
+        this.itemTplDelayed = '<tpl for="."><div class="x-list-item"><div class="x-list-item-body">' + tplStr + '</div>';
         if (this.onItemDisclosure) {
             this.itemTplDelayed += '<div class="x-list-disclosure"></div>';
         }
         this.itemTplDelayed += '</div></tpl>';
-        this.itemTplDelayed = new Ext.XTemplate(this.itemTplDelayed).compile();
+        this.itemTplDelayed = new Ext.XTemplate(this.itemTplDelayed).compile(); 
+        Ext.applyIf(this.itemTplDelayed,this.itemTpl);
 
 		Ext.ux.BufferedList.superclass.initComponent.call(this);
 
@@ -109,6 +118,18 @@ Ext.ux.BufferedList = Ext.extend(Ext.List, {
 	
 	// @private - override of refresh from DataView.
 	refresh: function() {
+
+
+		if(this.numRecords){
+			//when store data is increased.
+			if(this.store.getCount() > this.numRecords){
+				this.renderOnScroll({isStoreDataIncreased:true});
+				this.numRecords = this.store.getCount();
+				return;
+			} 
+		}else{
+			this.numRecords = this.store.getCount();
+		}
 
 		// DataView.refresh renders our proxies and list container
 		Ext.ux.BufferedList.superclass.refresh.apply(this,arguments);
@@ -267,6 +288,15 @@ Ext.ux.BufferedList = Ext.extend(Ext.List, {
 				newBottom = Math.min(previousBottom + this.batchSize,maxIndex);
 				scrollDown = true;
 				incrementalRender = true;
+			}
+
+			// behave in the same way as "scroll off bottom of list".
+			if(startRecord.isStoreDataIncreased === true){
+				newTop = previousTop;
+				newBottom = Math.min(previousBottom + this.batchSize,maxIndex);
+				scrollDown = true;
+				incrementalRender = true;
+
 			}
 		}
 
